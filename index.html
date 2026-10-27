@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>병음 첫걸음</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif:wght@500;700&family=Noto+Serif+SC:wght@500;700&display=swap">
+<style>
+/* Layout: 상단 고정 탭 + 한 열짜리 학습 카드 그리드, 성조 색으로 정보를 구분 */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --ink:#1d2622; --muted:#5d6b65; --line:#dbe3df;
+  --jade:#167a5f; --jade-soft:#e2f1ec;
+  --t1:#2f66c9; --t2:#1f9a5a; --t3:#c97a12; --t4:#c8372d; --t5:#7a8580;
+  --good:#1f9a5a; --bad:#c8372d;
+  --f-han:"Noto Serif SC","Songti SC","SimSun",serif;
+  --f-py:"Noto Serif","Georgia",serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111715; --surface:#1a2320; --ink:#e7eeea; --muted:#9aa9a2; --line:#2c3833;
+  --jade:#4cc3a0; --jade-soft:#1d3a31;
+  --t1:#7aa5f2; --t2:#5fd093; --t3:#f0a94a; --t4:#f27a6f; --t5:#9aa9a2;
+  --good:#5fd093; --bad:#f27a6f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111715; --surface:#1a2320; --ink:#e7eeea; --muted:#9aa9a2; --line:#2c3833;
+  --jade:#4cc3a0; --jade-soft:#1d3a31;
+  --t1:#7aa5f2; --t2:#5fd093; --t3:#f0a94a; --t4:#f27a6f; --t5:#9aa9a2;
+  --good:#5fd093; --bad:#f27a6f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:860px;margin:0 auto;padding-block:20px 48px}
+header.top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+header.top h1{font-family:var(--f-py);font-size:clamp(26px,6vw,36px);margin:0;letter-spacing:.01em}
+header.top h1 .hz{font-family:var(--f-han);color:var(--jade);margin-left:6px}
+header.top p{margin:0;color:var(--muted)}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;
+  padding-block:12px;margin-top:12px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs button{flex:1 0 auto;font:inherit;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:8px 14px;border-radius:999px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--jade);border-color:var(--jade);color:var(--surface)}
+button:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+section{padding-top:20px}
+h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
+.lead{color:var(--muted);margin:0 0 16px;max-width:62ch}
+.notice{background:var(--jade-soft);border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:14px}
+/* tones */
+.tones{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tone{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;cursor:pointer;
+  font:inherit;color:var(--ink);display:grid;gap:6px}
+.tone .py{font-family:var(--f-py);font-size:34px;font-weight:700;line-height:1}
+.tone .meta{font-size:13px;color:var(--muted)}
+.tone svg{width:100%;height:46px}
+.tone .lbl{font-weight:700;font-size:14px}
+/* sound cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 10px 8px;cursor:pointer;
+  font:inherit;color:var(--ink);text-align:left;display:grid;gap:2px;transition:border-color .15s}
+.card:hover{border-color:var(--jade)}
+.card .big{font-family:var(--f-py);font-size:26px;font-weight:700;line-height:1.1}
+.card .ko{font-size:13px;color:var(--jade);font-weight:500}
+.card .ex{font-size:13px;color:var(--muted)}
+.card .ex b{font-family:var(--f-han);font-weight:500;color:var(--ink);font-size:15px;margin-right:3px}
+.card.playing{border-color:var(--jade);background:var(--jade-soft)}
+.group-title{font-size:13px;letter-spacing:.06em;color:var(--muted);margin:18px 0 8px;font-weight:700}
+.rules{display:grid;gap:8px;margin-top:20px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px}
+.rule b{font-family:var(--f-py)}
+/* quiz */
+.modes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.modes button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer}
+.modes button[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);font-weight:700}
+.qbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:16px}
+.qhead{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.prompt{text-align:center;display:grid;gap:4px;justify-items:center}
+.prompt .hz{font-family:var(--f-han);font-size:64px;line-height:1.1}
+.prompt .py{font-family:var(--f-py);font-size:36px;font-weight:700}
+.prompt .mean{color:var(--muted);font-size:14px}
+.play{font:inherit;font-weight:700;border:none;background:var(--jade);color:var(--surface);border-radius:999px;padding:12px 22px;cursor:pointer}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{font:inherit;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:12px;cursor:pointer;
+  display:grid;justify-items:center;gap:2px}
+.opt .py{font-family:var(--f-py);font-size:24px;font-weight:700}
+.opt svg{width:60px;height:28px}
+.opt small{color:var(--muted)}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--surface))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.feedback{min-height:24px;text-align:center;font-weight:500}
+.next{justify-self:center;font:inherit;border:1px solid var(--jade);color:var(--jade);background:transparent;border-radius:999px;padding:8px 20px;cursor:pointer}
+.result{text-align:center;display:grid;gap:10px;justify-items:center}
+.result .score{font-family:var(--f-py);font-size:48px;font-weight:700;color:var(--jade);font-variant-numeric:tabular-nums}
+.c1{color:var(--t1)}.c2{color:var(--t2)}.c3{color:var(--t3)}.c4{color:var(--t4)}.c5{color:var(--t5)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Pīnyīn <span class="hz">拼音</span></h1>
+    <p>중국어 발음기호, 눌러서 듣고 읽어 보세요</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="tones" aria-selected="true">① 성조</button>
+    <button role="tab" data-tab="initials" aria-selected="false">② 성모</button>
+    <button role="tab" data-tab="finals" aria-selected="false">③ 운모</button>
+    <button role="tab" data-tab="quiz" aria-selected="false">④ 퀴즈</button>
+  </nav>
+
+  <p class="notice" id="voiceNote" hidden>이 기기에서 중국어 음성을 찾지 못했어요. 표와 읽기 퀴즈는 그대로 쓸 수 있고, 소리는 기기 설정에서 중국어 음성을 추가하면 나와요.</p>
+
+  <section id="tones">
+    <h2>성조: 음의 높낮이</h2>
+    <p class="lead">중국어는 같은 소리라도 높낮이가 다르면 뜻이 달라져요. 그래프는 목소리 높이를 1(낮음)~5(높음)로 그린 거예요. 카드를 눌러 들어 보세요.</p>
+    <div class="tones" id="toneCards"></div>
+  </section>
+
+  <section id="initials" hidden>
+    <h2>성모: 첫소리 (자음)</h2>
+    <p class="lead">한국어 자음과 비슷한 것부터 익히면 쉬워요. 한글 표기는 대략적인 소리예요. 카드를 누르면 예시 글자를 읽어 줘요.</p>
+    <div id="initialGroups"></div>
+  </section>
+
+  <section id="finals" hidden>
+    <h2>운모: 뒷소리 (모음)</h2>
+    <p class="lead">성모 뒤에 붙는 소리예요. 기본 모음 6개를 먼저 익히고, 나머지는 조합이라고 생각하면 돼요.</p>
+    <div id="finalGroups"></div>
+    <div class="rules">
+      <div class="rule"><b>zi ci si · zhi chi shi ri</b> 의 i는 '이'가 아니라 '으'에 가깝게 읽어요.</div>
+      <div class="rule"><b>j q x</b> 뒤의 u는 사실 ü(위)예요. <b>ju</b>는 '쥐', <b>xue</b>는 '쉬에'.</div>
+      <div class="rule">성모 없이 시작할 땐 i→<b>y</b>, u→<b>w</b>, ü→<b>yu</b>로 써요. 예: <b>yī</b>(衣), <b>wǔ</b>(五), <b>yú</b>(鱼).</div>
+      <div class="rule">성조 표시는 a → e → o 순서로 붙이고, iu·ui는 뒤 글자에 붙여요. 예: <b>liù</b>, <b>shuǐ</b>.</div>
+    </div>
+  </section>
+
+  <section id="quiz" hidden>
+    <h2>퀴즈</h2>
+    <p class="lead">한 판에 10문제예요.</p>
+    <div class="modes">
+      <button data-mode="read" aria-pressed="true">보고 성조 맞히기</button>
+      <button data-mode="listen" aria-pressed="false">듣고 병음 고르기</button>
+    </div>
+    <div class="qbox" id="qbox"></div>
+  </section>
+</div>
+
+<script>
+const MARKS={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù','ü':'ǖǘǚǜ'};
+function mark(s){
+  const m=s.match(/^([a-zü]+)([1-5])$/); if(!m) return s;
+  const base=m[1], t=+m[2]; if(t===5) return base;
+  let idx;
+  if(base.includes('a')) idx=base.indexOf('a');
+  else if(base.includes('e')) idx=base.indexOf('e');
+  else if(base.includes('ou')) idx=base.indexOf('o');
+  else { for(let k=base.length-1;k>=0;k--){ if('iouü'.includes(base[k])){idx=k;break;} } }
+  return base.slice(0,idx)+MARKS[base[idx]][t-1]+base.slice(idx+1);
+}
+const CONTOUR={1:[5,5],2:[3,5],3:[2,1,4],4:[5,1],5:[3,3]};
+function contourSVG(t,w=120,h=46){
+  const pts=CONTOUR[t], pad=6, n=pts.length;
+  const xy=pts.map((v,i)=>[pad+(w-2*pad)*i/(n-1), pad+(h-2*pad)*(5-v)/4]);
+  const lines=[1,2,3,4,5].map(v=>{const y=pad+(h-2*pad)*(5-v)/4;return `<line x1="${pad}" x2="${w-pad}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`}).join('');
+  const d=xy.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const dash=t===5?' stroke-dasharray="3 4"':'';
+  return `<svg viewBox="0 0 ${w} ${h}" aria-hidden="true">${lines}<path d="${d}" fill="none" stroke="var(--t${t})" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"${dash}/></svg>`;
+}
+
+/* ---------- speech ---------- */
+let zhVoice=null;
+function pickVoice(){
+  try{
+    const vs=speechSynthesis.getVoices();
+    zhVoice=vs.find(v=>/^zh[-_]CN/i.test(v.lang))||vs.find(v=>/^zh/i.test(v.lang))||null;
+    document.getElementById('voiceNote').hidden=!!zhVoice||vs.length===0;
+  }catch(e){document.getElementById('voiceNote').hidden=false;}
+}
+try{ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; setTimeout(()=>{pickVoice(); if(!zhVoice) document.getElementById('voiceNote').hidden=false;},1500);}catch(e){}
+function say(text,el){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='zh-CN'; if(zhVoice) u.voice=zhVoice; u.rate=0.75;
+    if(el){el.classList.add('playing'); u.onend=u.onerror=()=>el.classList.remove('playing');}
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- tones ---------- */
+const TONES=[
+  {t:1,name:'1성',desc:'높고 평평하게 쭉',hz:'妈',mean:'엄마'},
+  {t:2,name:'2성',desc:'아래에서 위로 올리며 "응?"',hz:'麻',mean:'삼(마)'},
+  {t:3,name:'3성',desc:'낮게 내렸다가 살짝 올림',hz:'马',mean:'말'},
+  {t:4,name:'4성',desc:'위에서 뚝 떨어지며 "아!"',hz:'骂',mean:'욕하다'},
+  {t:5,name:'경성',desc:'짧고 가볍게, 표시 없음',hz:'吗',mean:'~까?(의문)'}
+];
+document.getElementById('toneCards').innerHTML=TONES.map(o=>`
+  <button class="tone" data-say="${o.hz}">
+    <span class="lbl c${o.t}">${o.name}</span>
+    <span class="py c${o.t}">${mark('ma'+o.t)}</span>
+    ${contourSVG(o.t)}
+    <span class="meta">${o.desc}<br><span style="font-family:var(--f-han);color:var(--ink)">${o.hz}</span> ${o.mean}</span>
+  </button>`).join('');
+
+/* ---------- initials ---------- */
+const INIT=[
+  ['입술소리',[['b','ㅃ/ㅂ','八','ba1'],['p','ㅍ','怕','pa4'],['m','ㅁ','妈','ma1'],['f','f(윗니+아랫입술)','发','fa1']]],
+  ['혀끝소리',[['d','ㄸ/ㄷ','大','da4'],['t','ㅌ','他','ta1'],['n','ㄴ','你','ni3'],['l','ㄹ','老','lao3']]],
+  ['목구멍소리',[['g','ㄲ/ㄱ','哥','ge1'],['k','ㅋ','看','kan4'],['h','ㅎ(목 깊이)','好','hao3']]],
+  ['혀를 펴는 소리',[['j','ㅈ','鸡','ji1'],['q','ㅊ','七','qi1'],['x','ㅅ(시)','西','xi1']]],
+  ['혀를 마는 소리',[['zh','혀 말고 ㅈ','中','zhong1'],['ch','혀 말고 ㅊ','吃','chi1'],['sh','혀 말고 ㅅ','是','shi4'],['r','혀 말고 ㄹ','热','re4']]],
+  ['이 사이 소리',[['z','ㅉ','字','zi4'],['c','ㅊ(ㅊ+ㅅ)','菜','cai4'],['s','ㅆ','三','san1']]]
+];
+const FIN=[
+  ['기본 모음',[['a','아','啊','a1'],['o','오어','我','wo3'],['e','으어','饿','e4'],['i','이','衣','yi1'],['u','우','五','wu3'],['ü','위(입술 모은 이)','鱼','yu2']]],
+  ['복모음',[['ai','아이','爱','ai4'],['ei','에이','黑','hei1'],['ao','아오','好','hao3'],['ou','어우','狗','gou3'],['er','얼','二','er4']]],
+  ['ㄴ·ㅇ 받침',[['an','안','安','an1'],['en','언','很','hen3'],['ang','앙','忙','mang2'],['eng','엉','冷','leng3'],['ong','옹/웅','中','zhong1']]],
+  ['i로 시작',[['ia','이아','家','jia1'],['ie','이에','谢','xie4'],['iao','이아오','小','xiao3'],['iu','이어우','六','liu4'],['ian','이엔','天','tian1'],['in','인','新','xin1'],['iang','이앙','想','xiang3'],['ing','잉','听','ting1'],['iong','이웅','熊','xiong2']]],
+  ['u로 시작',[['ua','우아','花','hua1'],['uo','우어','说','shuo1'],['uai','우아이','快','kuai4'],['ui','우에이','水','shui3'],['uan','우안','晚','wan3'],['un','우언','春','chun1'],['uang','우앙','黄','huang2']]],
+  ['ü로 시작',[['üe','위에','学','xue2'],['üan','위엔','远','yuan3'],['ün','윈','云','yun2']]]
+];
+function groupsHTML(G){
+  return G.map(([title,items])=>`<div class="group-title">${title}</div><div class="grid">`+
+    items.map(([k,ko,hz,py])=>`<button class="card" data-say="${hz}"><span class="big">${k}</span><span class="ko">${ko}</span><span class="ex"><b>${hz}</b>${mark(py)}</span></button>`).join('')+'</div>').join('');
+}
+document.getElementById('initialGroups').innerHTML=groupsHTML(INIT);
+document.getElementById('finalGroups').innerHTML=groupsHTML(FIN);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-say]'); if(b) say(b.dataset.say,b);});
+
+/* ---------- tabs ---------- */
+const TABS=['tones','initials','finals','quiz'];
+function show(id){
+  if(!TABS.includes(id)) id='tones';
+  TABS.forEach(t=>document.getElementById(t).hidden=t!==id);
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===id));
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{location.hash=b.dataset.tab;show(b.dataset.tab);}));
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
+
+/* ---------- quiz ---------- */
+const WORDS=[
+ ['妈','ma1','엄마'],['马','ma3','말'],['八','ba1','여덟'],['白','bai2','희다'],['笔','bi3','펜'],['不','bu4','아니다'],
+ ['你','ni3','너'],['好','hao3','좋다'],['谢','xie4','감사하다'],['书','shu1','책'],['茶','cha2','차'],['水','shui3','물'],
+ ['热','re4','덥다'],['菜','cai4','요리'],['早','zao3','이르다'],['三','san1','셋'],['四','si4','넷'],['六','liu4','여섯'],
+ ['七','qi1','일곱'],['九','jiu3','아홉'],['十','shi2','열'],['来','lai2','오다'],['去','qu4','가다'],['看','kan4','보다'],
+ ['听','ting1','듣다'],['说','shuo1','말하다'],['学','xue2','배우다'],['女','nü3','여자'],['绿','lü4','초록'],['鱼','yu2','물고기'],
+ ['狗','gou3','개'],['猫','mao1','고양이'],['花','hua1','꽃'],['月','yue4','달'],['中','zhong1','가운데'],['国','guo2','나라'],
+ ['人','ren2','사람'],['喝','he1','마시다'],['吃','chi1','먹다'],['钱','qian2','돈']
+];
+let mode='read', round=[], qi=0, score=0, answered=false;
+function best(){try{return +localStorage.getItem('best-'+mode)||0}catch(e){return 0}}
+function saveBest(v){try{if(v>best())localStorage.setItem('best-'+mode,v)}catch(e){}}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newRound(){round=shuffle(WORDS).slice(0,10);qi=0;score=0;renderQ();}
+const qbox=document.getElementById('qbox');
+function renderQ(){
+  answered=false;
+  if(qi>=round.length) return renderResult();
+  const [hz,py,mean]=round[qi], base=py.slice(0,-1), t=+py.slice(-1);
+  const head=`<div class="qhead"><span>${qi+1} / ${round.length}</span><span>맞힌 개수 ${score} · 최고 ${best()}</span></div>`;
+  let body;
+  if(mode==='read'){
+    body=`<div class="prompt"><span class="hz">${hz}</span><span class="py">${mark(py)}</span><span class="mean">${mean}</span></div>
+      <div class="opts">${[1,2,3,4].map(n=>`<button class="opt" data-ans="${n}"><span class="c${n}" style="font-weight:700">${n}성</span>${contourSVG(n,60,28)}</button>`).join('')}</div>`;
+  }else{
+    body=`<div class="prompt"><button class="play" id="playBtn">▶ 소리 듣기</button><span class="mean">들리는 발음을 골라 보세요</span></div>
+      <div class="opts">${[1,2,3,4].map(n=>`<button class="opt" data-ans="${n}"><span class="py">${mark(base+n)}</span><small>${n}성</small></button>`).join('')}</div>`;
+  }
+  qbox.innerHTML=head+body+`<div class="feedback" id="fb"></div>`;
+  if(mode==='listen'){const p=document.getElementById('playBtn');p.onclick=()=>say(hz);}
+  qbox.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.ans,t,hz,py,mean));
+}
+function pick(n,t,hz,py,mean){
+  if(answered) return; answered=true;
+  const ok=n===t; if(ok) score++;
+  qbox.querySelectorAll('.opt').forEach(b=>{const v=+b.dataset.ans;if(v===t)b.classList.add('right');else if(v===n)b.classList.add('wrong');});
+  document.getElementById('fb').innerHTML=(ok?'<span style="color:var(--good)">정답이에요!</span>':'<span style="color:var(--bad)">아쉬워요.</span>')+
+    ` <span style="font-family:var(--f-han)">${hz}</span> <b style="font-family:var(--f-py)" class="c${t}">${mark(py)}</b> · ${mean}`;
+  say(hz);
+  const nx=document.createElement('button');nx.className='next';nx.textContent=qi+1<round.length?'다음 문제':'결과 보기';
+  nx.onclick=()=>{qi++;renderQ();};qbox.appendChild(nx);nx.focus();
+}
+function renderResult(){
+  saveBest(score);
+  const msg=score>=9?'훌륭해요! 성조 감이 확실히 잡혔어요.':score>=6?'좋아요. 틀린 성조를 표에서 다시 들어 보세요.':'처음엔 다 어려워요. 성조 탭에서 네 가지 소리를 먼저 들어 보세요.';
+  qbox.innerHTML=`<div class="result"><span class="score">${score} / 10</span><span>${msg}</span><span style="color:var(--muted);font-size:13px">최고 기록 ${best()}</span><button class="play" id="again">다시 하기</button></div>`;
+  document.getElementById('again').onclick=newRound;
+}
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
+  mode=b.dataset.mode;
+  document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  newRound();
+});
+newRound();
+</script>
+</body>
+</html>

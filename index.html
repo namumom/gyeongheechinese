@@ -147,6 +147,20 @@ h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
   </section>
 </div>
 
+<div id="inapp" hidden style="position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:var(--bg);padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:8px;font-size:14px">
+  <span>카카오톡 안에서는 소리가 나지 않아요. 기본 브라우저로 열어 주세요.</span>
+  <a id="openExt" href="#" style="justify-self:start;background:var(--jade);color:var(--surface);padding:8px 16px;border-radius:999px;text-decoration:none;font-weight:700">브라우저로 열기</a>
+</div>
+<script>
+/* 카카오톡 인앱 브라우저면 외부 브라우저로 넘기기 */
+(function(){
+  if(!/KAKAOTALK/i.test(navigator.userAgent)) return;
+  const ext='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);
+  const bar=document.getElementById('inapp'); bar.hidden=false;
+  document.getElementById('openExt').href=ext;
+  location.href=ext;
+})();
+</script>
 <script>
 const MARKS={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù','ü':'ǖǘǚǜ'};
 function mark(s){

@@ -45,6 +45,9 @@ button:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
 section{padding-top:20px}
 h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
 .lead{color:var(--muted);margin:0 0 16px;max-width:62ch}
+.speed{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.speed button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 12px;border-radius:999px;cursor:pointer}
+.speed button[aria-pressed="true"]{border-color:var(--jade);color:var(--jade);font-weight:700}
 .notice{background:var(--jade-soft);border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:14px}
 /* tones */
 .tones{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -102,6 +105,9 @@ h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
     <h1>Pīnyīn <span class="hz">拼音</span></h1>
     <p>중국어 발음기호, 눌러서 듣고 읽어 보세요</p>
   </header>
+  <div class="speed" role="group" aria-label="읽기 속도">읽기 속도
+    <button data-rate="0.45">아주 느리게</button><button data-rate="0.6">느리게</button><button data-rate="0.8">보통</button>
+  </div>
 
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="tones" aria-selected="true">① 성조</button>
@@ -149,7 +155,10 @@ h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
 
 <div id="inapp" hidden style="position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:var(--bg);padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:8px;font-size:14px">
   <span>카카오톡 안에서는 소리가 나지 않아요. 기본 브라우저로 열어 주세요.</span>
-  <a id="openExt" href="#" style="justify-self:start;background:var(--jade);color:var(--surface);padding:8px 16px;border-radius:999px;text-decoration:none;font-weight:700">브라우저로 열기</a>
+  <span style="display:flex;gap:8px;flex-wrap:wrap">
+    <a id="openExt" href="#" style="background:var(--jade);color:var(--surface);padding:8px 16px;border-radius:999px;text-decoration:none;font-weight:700">브라우저로 열기</a>
+    <button type="button" onclick="document.getElementById('inapp').hidden=true" style="font:inherit;background:transparent;color:var(--bg);border:1px solid var(--muted);padding:8px 16px;border-radius:999px;cursor:pointer">닫기</button>
+  </span>
 </div>
 <script>
 /* 카카오톡 인앱 브라우저면 외부 브라우저로 넘기기 */
@@ -157,7 +166,8 @@ h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
   if(!/KAKAOTALK/i.test(navigator.userAgent)) return;
   const ext='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href);
   const bar=document.getElementById('inapp'); bar.hidden=false;
-  document.getElementById('openExt').href=ext;
+  const btn=document.getElementById('openExt'); btn.href=ext;
+  btn.addEventListener('click',()=>{ setTimeout(()=>{ bar.hidden=true; },300); });
   location.href=ext;
 })();
 </script>
@@ -184,6 +194,13 @@ function contourSVG(t,w=120,h=46){
 }
 
 /* ---------- speech ---------- */
+const MOBILE=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+let RATE=MOBILE?0.45:0.8;
+try{const r=parseFloat(localStorage.getItem('rate'));if(r)RATE=r;}catch(e){}
+function markRate(){document.querySelectorAll('.speed button').forEach(b=>b.setAttribute('aria-pressed',parseFloat(b.dataset.rate)===RATE));}
+document.querySelectorAll('.speed button').forEach(b=>b.addEventListener('click',()=>{
+  RATE=parseFloat(b.dataset.rate);try{localStorage.setItem('rate',RATE)}catch(e){}markRate();say('你好');}));
+markRate();
 let zhVoice=null;
 function pickVoice(){
   try{
@@ -197,7 +214,7 @@ function say(text,el){
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang='zh-CN'; if(zhVoice) u.voice=zhVoice; u.rate=0.75;
+    u.lang='zh-CN'; if(zhVoice) u.voice=zhVoice; u.rate=RATE;
     if(el){el.classList.add('playing'); u.onend=u.onerror=()=>el.classList.remove('playing');}
     speechSynthesis.speak(u);
   }catch(e){}

@@ -40,7 +40,7 @@ header.top p{margin:0;color:var(--muted)}
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;
   padding-block:12px;margin-top:12px;border-bottom:1px solid var(--line);overflow-x:auto}
 nav.tabs button{flex:1 0 auto;font:inherit;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);
-  padding:8px 14px;border-radius:999px;cursor:pointer}
+  padding:8px 12px;border-radius:999px;cursor:pointer}
 nav.tabs button[aria-selected="true"]{background:var(--jade);border-color:var(--jade);color:var(--surface)}
 button:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
 section{padding-top:20px}
@@ -54,6 +54,21 @@ header.top.hero{display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
 .hero img{width:96px;height:120px;object-fit:cover;object-position:50% 20%;border-radius:14px;flex:none;background:var(--line);transition:opacity .25s}
 .hero .txt{min-width:0;display:grid;gap:2px}
 @media (min-width:600px){.hero img{width:120px;height:150px}}
+.say-row{display:flex;gap:8px;flex-wrap:wrap}
+.say-row input{flex:1 1 220px;min-width:0;font:inherit;font-family:var(--f-py);font-size:20px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.say-row input:focus{outline:none;border-color:var(--jade)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 0;font-size:13px;color:var(--muted);align-items:center}
+.chip{font:inherit;font-family:var(--f-py);font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:4px 10px;border-radius:999px;cursor:pointer}
+.say-out{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;min-height:92px;align-items:flex-start}
+.syl{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:76px;display:grid;justify-items:center;gap:2px;cursor:pointer}
+.syl.playing{border-color:var(--jade);background:var(--jade-soft)}
+.syl .spy{font-family:var(--f-py);font-size:22px;font-weight:700}
+.syl .sch{font-family:var(--f-han);font-size:24px;line-height:1.2}
+.syl .snote{font-size:11px;color:var(--muted)}
+.syl.bad{cursor:default;border-style:dashed}.syl.bad .spy{color:var(--bad)}
+.say-empty{color:var(--muted);margin:0}
+.say-help{margin-top:20px;display:grid;gap:6px;font-size:14px;color:var(--muted)}
+.say-help b{color:var(--ink);font-family:var(--f-py)}
 .notice{background:var(--jade-soft);border-radius:10px;padding:10px 14px;margin:0 0 16px;font-size:14px}
 /* tones */
 .tones{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -111,7 +126,7 @@ header.top.hero{display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
     <img id="heroPhoto" alt="장릉혁 사진">
     <div class="txt">
       <h1>중국가서 장릉혁 만나기 프로젝트</h1>
-      <p>part.1</p>
+      <p>중국어 병음 연습하기</p>
     </div>
   </header>
   <div class="speed" role="group" aria-label="읽기 속도">읽기 속도
@@ -122,10 +137,10 @@ header.top.hero{display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
     <button role="tab" data-tab="tones" aria-selected="true">① 성조</button>
     <button role="tab" data-tab="initials" aria-selected="false">② 성모</button>
     <button role="tab" data-tab="finals" aria-selected="false">③ 운모</button>
-    <button role="tab" data-tab="quiz" aria-selected="false">④ 퀴즈</button>
+    <button role="tab" data-tab="say" aria-selected="false">④ 직접 입력</button>
   </nav>
 
-  <p class="notice" id="voiceNote" hidden>이 기기에서 중국어 음성을 찾지 못했어요. 표와 읽기 퀴즈는 그대로 쓸 수 있고, 소리는 기기 설정에서 중국어 음성을 추가하면 나와요.</p>
+  <p class="notice" id="voiceNote" hidden>이 기기에서 중국어 음성을 찾지 못했어요. 표는 그대로 볼 수 있고, 소리는 기기 설정에서 중국어 음성을 추가하면 나와요.</p>
 
   <section id="tones">
     <h2>성조: 음의 높낮이</h2>
@@ -151,14 +166,28 @@ header.top.hero{display:flex;align-items:center;gap:16px;flex-wrap:nowrap}
     </div>
   </section>
 
-  <section id="quiz" hidden>
-    <h2>퀴즈</h2>
-    <p class="lead">한 판에 10문제예요.</p>
-    <div class="modes">
-      <button data-mode="read" aria-pressed="true">보고 성조 맞히기</button>
-      <button data-mode="listen" aria-pressed="false">듣고 병음 고르기</button>
+  <section id="say" hidden>
+    <h2>병음 입력해서 듣기</h2>
+    <p class="lead">영문으로 병음을 쓰면 중국어 발음으로 읽어 줘요. 성조는 음절 뒤에 숫자 1~4를 붙이세요.</p>
+    <div class="say-row">
+      <input id="sayInput" type="text" value="zhang1 ling2 he4" placeholder="예: ni3 hao3" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="병음 입력">
+      <button class="play" id="sayBtn" type="button">▶ 듣기</button>
     </div>
-    <div class="qbox" id="qbox"></div>
+    <div class="chips">예시
+      <button class="chip" type="button" data-ex="ni3 hao3">ni3 hao3</button>
+      <button class="chip" type="button" data-ex="xie4 xie4">xie4 xie4</button>
+      <button class="chip" type="button" data-ex="wo3 ai4 ni3">wo3 ai4 ni3</button>
+      <button class="chip" type="button" data-ex="zai4 jian4">zai4 jian4</button>
+      <button class="chip" type="button" data-ex="zhang1 ling2 he4">zhang1 ling2 he4</button>
+      <button class="chip" type="button" data-ex="wo3 xiang3 jian4 ni3">wo3 xiang3 jian4 ni3</button>
+    </div>
+    <div class="say-out" id="sayOut" aria-live="polite"></div>
+    <div class="say-help">
+      <span>성조 숫자를 빼고 <b>nihao</b>처럼 써도 돼요. 그땐 가장 흔한 성조로 읽어요.</span>
+      <span>ü는 <b>v</b>로 쓰세요. 예: <b>lv4</b>(绿), <b>nv3</b>(女)</span>
+      <span>경성은 <b>5</b>를 붙이세요. 예: <b>ma5</b>(吗)</span>
+      <span>각 카드를 누르면 그 글자만 따로 들려줘요.</span>
+    </div>
   </section>
   <p class="foot">카카오톡 안에서 열면 소리가 나지 않아요. 크롬이나 사파리로 열어 주세요.</p>
 </div>
@@ -269,7 +298,7 @@ function randomPhoto(){
 }
 randomPhoto();
 /* ---------- tabs ---------- */
-const TABS=['tones','initials','finals','quiz'];
+const TABS=['tones','initials','finals','say'];
 function show(id){
   if(!TABS.includes(id)) id='tones';
   TABS.forEach(t=>document.getElementById(t).hidden=t!==id);
@@ -280,61 +309,140 @@ document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('clic
 window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
 show(location.hash.slice(1));
 
-/* ---------- quiz ---------- */
-const WORDS=[
- ['妈','ma1','엄마'],['马','ma3','말'],['八','ba1','여덟'],['白','bai2','희다'],['笔','bi3','펜'],['不','bu4','아니다'],
- ['你','ni3','너'],['好','hao3','좋다'],['谢','xie4','감사하다'],['书','shu1','책'],['茶','cha2','차'],['水','shui3','물'],
- ['热','re4','덥다'],['菜','cai4','요리'],['早','zao3','이르다'],['三','san1','셋'],['四','si4','넷'],['六','liu4','여섯'],
- ['七','qi1','일곱'],['九','jiu3','아홉'],['十','shi2','열'],['来','lai2','오다'],['去','qu4','가다'],['看','kan4','보다'],
- ['听','ting1','듣다'],['说','shuo1','말하다'],['学','xue2','배우다'],['女','nü3','여자'],['绿','lü4','초록'],['鱼','yu2','물고기'],
- ['狗','gou3','개'],['猫','mao1','고양이'],['花','hua1','꽃'],['月','yue4','달'],['中','zhong1','가운데'],['国','guo2','나라'],
- ['人','ren2','사람'],['喝','he1','마시다'],['吃','chi1','먹다'],['钱','qian2','돈']
-];
-let mode='read', round=[], qi=0, score=0, answered=false;
-function best(){try{return +localStorage.getItem('best-'+mode)||0}catch(e){return 0}}
-function saveBest(v){try{if(v>best())localStorage.setItem('best-'+mode,v)}catch(e){}}
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newRound(){round=shuffle(WORDS).slice(0,10);qi=0;score=0;renderQ();}
-const qbox=document.getElementById('qbox');
-function renderQ(){
-  answered=false;
-  if(qi>=round.length) return renderResult();
-  const [hz,py,mean]=round[qi], base=py.slice(0,-1), t=+py.slice(-1);
-  const head=`<div class="qhead"><span>${qi+1} / ${round.length}</span><span>맞힌 개수 ${score} · 최고 ${best()}</span></div>`;
-  let body;
-  if(mode==='read'){
-    body=`<div class="prompt"><span class="hz">${hz}</span><span class="py">${mark(py)}</span><span class="mean">${mean}</span></div>
-      <div class="opts">${[1,2,3,4].map(n=>`<button class="opt" data-ans="${n}"><span class="c${n}" style="font-weight:700">${n}성</span>${contourSVG(n,60,28)}</button>`).join('')}</div>`;
-  }else{
-    body=`<div class="prompt"><button class="play" id="playBtn">▶ 소리 듣기</button><span class="mean">들리는 발음을 골라 보세요</span></div>
-      <div class="opts">${[1,2,3,4].map(n=>`<button class="opt" data-ans="${n}"><span class="py">${mark(base+n)}</span><small>${n}성</small></button>`).join('')}</div>`;
-  }
-  qbox.innerHTML=head+body+`<div class="feedback" id="fb"></div>`;
-  if(mode==='listen'){const p=document.getElementById('playBtn');p.onclick=()=>say(hz);}
-  qbox.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.ans,t,hz,py,mean));
-}
-function pick(n,t,hz,py,mean){
-  if(answered) return; answered=true;
-  const ok=n===t; if(ok) score++;
-  qbox.querySelectorAll('.opt').forEach(b=>{const v=+b.dataset.ans;if(v===t)b.classList.add('right');else if(v===n)b.classList.add('wrong');});
-  document.getElementById('fb').innerHTML=(ok?'<span style="color:var(--good)">정답이에요!</span>':'<span style="color:var(--bad)">아쉬워요.</span>')+
-    ` <span style="font-family:var(--f-han)">${hz}</span> <b style="font-family:var(--f-py)" class="c${t}">${mark(py)}</b> · ${mean}`;
-  say(hz);
-  const nx=document.createElement('button');nx.className='next';nx.textContent=qi+1<round.length?'다음 문제':'결과 보기';
-  nx.onclick=()=>{qi++;renderQ();};qbox.appendChild(nx);nx.focus();
-}
-function renderResult(){
-  saveBest(score);
-  const msg=score>=9?'훌륭해요! 성조 감이 확실히 잡혔어요.':score>=6?'좋아요. 틀린 성조를 표에서 다시 들어 보세요.':'처음엔 다 어려워요. 성조 탭에서 네 가지 소리를 먼저 들어 보세요.';
-  qbox.innerHTML=`<div class="result"><span class="score">${score} / 10</span><span>${msg}</span><span style="color:var(--muted);font-size:13px">최고 기록 ${best()}</span><button class="play" id="again">다시 하기</button></div>`;
-  document.getElementById('again').onclick=newRound;
-}
-document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{
-  mode=b.dataset.mode;
-  document.querySelectorAll('.modes button').forEach(x=>x.setAttribute('aria-pressed',x===b));
-  newRound();
+/* ---------- 직접 입력해서 듣기 ---------- */
+/* 형식: 음절:1성2성3성4성 한자 + 성조 없이 입력했을 때 쓸 성조 번호. _ 는 해당 성조 없음 */
+const SYL_RAW=`a:阿___1 ai:哀癌矮爱4 an:安_俺按1 ang:肮昂_盎2 ao:凹熬袄奥4
+ba:八拔把爸1 bai:掰白百拜2 ban:班_板半1 bang:帮_绑棒1 bao:包雹宝报1 bei:杯_北被1 ben:奔_本笨3 beng:崩甭_蹦1
+bi:逼鼻笔必3 bian:边_扁变1 biao:标_表_3 bie:憋别瘪_2 bin:宾__殡1 bing:冰_饼病1 bo:波博跛擘1 bu:__补不4
+ca:擦___1 cai:猜才彩菜2 can:餐残惨灿1 cang:仓藏__1 cao:操曹草_3 ce:___册4 cen:_岑__2 ceng:噌层_蹭2
+cha:插茶衩岔2 chai:拆柴__2 chan:搀馋产颤3 chang:昌常厂唱2 chao:超潮吵_1 che:车_扯彻1 chen:嗔陈碜趁2 cheng:称成逞秤2
+chi:吃迟尺赤1 chong:冲虫宠铳1 chou:抽愁丑臭1 chu:出除楚触1 chua:欻___1 chuai:搋_揣踹1 chuan:穿船喘串1 chuang:窗床闯创1
+chui:吹垂__1 chun:春纯蠢_1 chuo:戳__绰1 ci:疵词此次4 cong:聪从__2 cou:___凑4 cu:粗__醋1 cuan:蹿__窜4
+cui:催_璀脆4 cun:村存忖寸1 cuo:搓矬_错4
+da:搭达打大4 dai:呆_歹带4 dan:单_胆但1 dang:当_党荡1 dao:刀_岛到4 de:嘚得__2 deng:灯_等邓3 di:低敌底第4
+dia:嗲___1 dian:颠_点电4 diao:雕__掉4 die:爹叠__1 ding:丁_顶定1 diu:丢___1 dong:东_懂动1 dou:兜_抖豆1
+du:督读赌度2 duan:端_短断3 dui:堆__对4 dun:吨_盹顿1 duo:多夺朵舵1
+e:婀鹅_饿4 ei:欸___1 en:恩__摁1 er:_儿耳二2
+fa:发罚法珐1 fan:翻烦反饭4 fang:方房访放1 fei:飞肥匪费1 fen:分坟粉份1 feng:风逢讽凤1 fo:_佛__2 fou:__否_3 fu:夫福府父2
+ga:嘎__尬1 gai:该_改盖1 gan:甘_敢赣1 gang:刚_港杠1 gao:高_搞告1 ge:哥格舸个1 gei:__给_3 gen:根哏艮亘1
+geng:耕_耿更1 gong:工_拱共1 gou:沟_狗够3 gu:姑_古故3 gua:瓜_寡挂1 guai:乖_拐怪4 guan:关_管惯1 guang:光_广逛1
+gui:归_鬼贵4 gun:__滚棍3 guo:锅国果过2
+ha:哈___1 hai:嗨孩海害2 han:憨寒喊汉4 hang:夯航_沆2 hao:蒿毫好号3 he:喝河_贺2 hei:黑___1 hen:_痕很恨3
+heng:哼横__2 hong:轰红哄_2 hou:_猴吼后4 hu:呼湖虎户2 hua:花华_话1 huai:_怀_坏4 huan:欢环缓换1 huang:荒黄谎晃2
+hui:灰回毁惠4 hun:昏魂_混1 huo:豁活火或3
+ji:鸡级几记1 jia:家颊假价1 jian:尖_简见4 jiang:江_讲酱1 jiao:交嚼脚叫4 jie:接节姐借3 jin:金_紧进1 jing:京_井静1
+jiong:扃_窘_3 jiu:揪_九就4 ju:居局举句1 juan:捐_卷倦1 jue:撅决蹶倔2 jun:军__俊1
+ka:咖_卡_3 kai:开_凯慨1 kan:刊_砍看4 kang:康__抗1 kao:尻_考靠3 ke:科咳可课3 ken:__肯_3 keng:坑___1
+kong:空_恐控1 kou:抠_口扣3 ku:哭_苦酷1 kua:夸_垮跨1 kuai:__蒯快4 kuan:宽_款_1 kuang:筐狂夼矿2 kui:亏葵傀愧1
+kun:昆_捆困4 kuo:___扩4
+la:拉_喇辣1 lai:_来_赖2 lan:_蓝懒烂2 lang:啷狼朗浪2 lao:捞劳老涝3 le:___叻4 lei:_雷磊类4 leng:_棱冷愣3
+li:哩离里力3 lia:__俩_3 lian:_连脸练2 liang:_凉两亮3 liao:撩聊蓼料2 lie:___列4 lin:_林凛吝2 ling:拎零领另2
+liu:溜流柳六4 long:_龙拢_2 lou:_楼篓漏2 lu:撸炉鲁路4 lü:_驴旅绿4 luan:_峦卵乱4 lüe:___略4 lun:抡轮_论4 luo:_罗裸洛2
+ma:妈麻马骂1 mai:_埋买卖3 man:颟蛮满慢4 mang:牤忙莽_2 mao:猫毛卯帽1 me:么___1 mei:_没美妹2 men:_门_闷2
+meng:_盟猛梦4 mi:眯迷米密3 mian:_棉免面4 miao:喵苗秒庙1 mie:乜__灭4 min:_民敏_2 ming:_明酩命2 miu:___谬4
+mo:摸魔抹墨1 mou:哞谋某_3 mu:_模母木4
+na:_拿哪那4 nai:__奶耐3 nan:囡男腩_2 nang:囔囊攮齉2 nao:孬挠脑闹3 nei:__馁内4 nen:___嫩4 neng:_能__2
+ni:妮泥你逆3 nian:蔫年碾念2 niang:_娘_酿2 niao:__鸟尿3 nie:捏__聂1 nin:_您__2 ning:_宁_泞2 niu:妞牛扭_2
+nong:_农_弄2 nu:_奴努怒4 nü:__女_3 nuan:__暖_3 nüe:___虐4 nuo:_挪_诺4
+o:噢哦_哦1 ou:欧_偶怄1
+pa:趴爬_怕4 pai:拍排_派4 pan:攀盘_盼4 pang:乓旁耪胖4 pao:抛袍跑炮3 pei:呸陪_配2 pen:喷盆__1 peng:烹朋捧碰2
+pi:批皮匹屁2 pian:篇骈_片4 piao:飘瓢瞟票4 pie:瞥_撇_1 pin:拼贫品聘3 ping:乒平__2 po:坡婆叵破4 pou:剖抔__1 pu:扑葡普瀑3
+qi:七骑起气4 qia:掐__恰1 qian:千钱浅欠2 qiang:枪墙抢呛1 qiao:敲桥巧俏2 qie:切茄且窃1 qin:亲琴寝沁1 qing:青晴请庆3
+qiong:穹穷__2 qiu:秋球糗_1 qu:区渠取去4 quan:圈全犬劝2 que:缺瘸_却4 qun:逡群__2
+ran:_然染_2 rang:_瓤壤让4 rao:_饶扰绕4 re:__惹热4 ren:_人忍认2 reng:扔仍__1 ri:___日4 rong:_容冗_2
+rou:_柔_肉4 ru:_如乳入2 ruan:__软_3 rui:_蕤蕊锐4 run:___润4 ruo:___弱4
+sa:撒_洒萨1 sai:塞__赛4 san:三_伞散1 sang:桑_嗓丧1 sao:骚_扫_3 se:___色4 sen:森___1 seng:僧___1
+sha:杀啥傻煞1 shai:筛__晒4 shan:山_闪善1 shang:伤_赏上4 shao:烧勺少哨3 she:奢蛇舍社2 shei:_谁__2 shen:身神审肾1
+sheng:生绳省胜1 shi:师十使是4 shou:收_手受3 shu:书熟鼠树1 shua:刷_耍_1 shuai:摔_甩帅4 shuan:栓__涮1 shuang:双_爽_1
+shui:__水睡3 shun:__吮顺4 shuo:说__硕1 si:思_死四4 song:松_耸送4 sou:搜_擞嗽1 su:苏俗_素1 suan:酸__算4
+sui:虽随髓岁4 sun:孙_损_1 suo:缩_锁_3
+ta:他_塔踏1 tai:胎台_太4 tan:贪谈坦叹2 tang:汤糖躺烫2 tao:涛桃讨套2 te:___特4 teng:_疼__2 ti:踢提体替2
+tian:天甜舔_1 tiao:挑条窕跳4 tie:贴_铁帖3 ting:听停挺_1 tong:通同统痛2 tou:偷头_透2 tu:突图土兔2 tuan:湍团__2
+tui:推颓腿退3 tun:吞屯__1 tuo:拖驼妥拓1
+wa:挖娃瓦袜1 wai:歪_崴外4 wan:弯完晚万3 wang:汪王网忘2 wei:威围尾位4 wen:温文稳问4 weng:翁__瓮1 wo:窝_我握3 wu:屋无五物3
+xi:西习洗细1 xia:虾侠_下4 xian:先闲显线1 xiang:香详想向3 xiao:消淆小笑3 xie:些鞋写谢4 xin:心__信1 xing:星形醒姓2
+xiong:兄熊__2 xiu:修_朽秀1 xu:需徐许续1 xuan:宣玄选炫3 xue:靴学雪谑2 xun:勋寻_训2
+ya:压牙哑亚1 yan:烟言眼燕3 yang:央羊养样4 yao:腰摇咬要4 ye:耶爷也夜3 yi:一姨已意1 yin:音银引印1 ying:英赢影硬1
+yo:哟___1 yong:拥_永用4 you:优由有又3 yu:迂鱼雨玉2 yuan:冤元远院2 yue:约__月4 yun:晕云允运2
+za:咂杂咋_2 zai:灾_宰在4 zan:簪咱攒赞4 zang:脏__葬1 zao:遭凿早造3 ze:_则_仄2 zei:_贼__2 zen:__怎_3
+zeng:增__赠1 zha:渣闸眨炸2 zhai:摘宅窄债2 zhan:沾_展站4 zhang:张_掌丈1 zhao:招_找照3 zhe:遮折者这4 zhen:真_枕镇1
+zheng:争_整正4 zhi:知直纸至1 zhong:中_肿众1 zhou:周轴肘皱1 zhu:猪竹主住1 zhua:抓_爪_1 zhuai:__跩拽4 zhuan:专_转赚1
+zhuang:装__撞1 zhui:追__坠1 zhun:谆_准_3 zhuo:捉桌__1 zi:资_子字4 zong:宗_总粽1 zou:邹_走奏3 zu:租足组_1
+zuan:钻_纂攥1 zui:__嘴最4 zun:尊___1 zuo:_昨左做4`;
+const SYL={};
+SYL_RAW.trim().split(/\s+/).forEach(e=>{
+  const [k,v]=e.split(':'); const chars=[...v];
+  SYL[k]={t:[null,...chars.slice(0,4).map(c=>c==='_'?null:c)], def:+chars[4]};
 });
-newRound();
+const NEUTRAL={ma:'吗',me:'么',ne:'呢',ba:'吧',de:'的',le:'了',men:'们',zi:'子',zhe:'着',a:'啊',ya:'呀',la:'啦',guo:'过',tou:'头'};
+const SYL_KEYS=Object.keys(SYL).sort((a,b)=>b.length-a.length);
+const UNMARK={};
+Object.entries(MARKS).forEach(([b,s])=>[...s].forEach((c,i)=>UNMARK[c]=[b,i+1]));
+
+function parsePinyin(input){
+  const out=[];
+  const text=input.toLowerCase().normalize('NFC').replace(/u:/g,'ü').replace(/v/g,'ü');
+  const re=/([a-zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü]+)([0-5]?)/g; let m;
+  while((m=re.exec(text))){
+    const tone=m[2]?+m[2]:0, marks={};
+    let letters=[...m[1]].map((c,i)=>{ if(UNMARK[c]){marks[i]=UNMARK[c][1];return UNMARK[c][0];} return c; }).join('');
+    letters=letters.replace(/([jqxy])ü/g,'$1u');
+    const parts=segment(letters);
+    if(!parts){ out.push({bad:true,raw:m[1]}); continue; }
+    let pos=0;
+    parts.forEach((p,i)=>{
+      let mk=0; for(let k=pos;k<pos+p.length;k++) if(marks[k]) mk=marks[k];
+      pos+=p.length;
+      const t=mk||(i===parts.length-1?tone:0);
+      out.push(makeSyl(p,t));
+    });
+  }
+  return out;
+}
+/* 글자 덩어리를 음절로 나누기 (긴 것부터, 막히면 되돌아가기) */
+function segment(s){
+  if(!s) return [];
+  for(const k of SYL_KEYS){
+    if(s.startsWith(k)){
+      const rest=segment(s.slice(k.length));
+      if(rest) return [k,...rest];
+    }
+  }
+  return null;
+}
+function makeSyl(p,tone){
+  const e=SYL[p]; if(!e) return {bad:true,raw:p};
+  let auto=false, ch=null, t=tone;
+  if(t===5){ ch=NEUTRAL[p]||e.t.find(Boolean); }
+  else if(t>=1&&t<=4){ ch=e.t[t]; if(!ch){ ch=e.t[e.def]||e.t.find(Boolean); } }
+  else { t=e.def; ch=e.t[t]||e.t.find(Boolean); auto=true; }
+  return {p, tone:t, ch, auto, missing:tone>=1&&tone<=4&&!e.t[tone]};
+}
+
+const sayIn=document.getElementById('sayInput');
+const sayOut=document.getElementById('sayOut');
+let lastParsed=[];
+function renderSay(){
+  lastParsed=parsePinyin(sayIn.value);
+  if(!sayIn.value.trim()){ sayOut.innerHTML='<p class="say-empty">위 칸에 병음을 입력하면 여기에 발음이 나와요.</p>'; return; }
+  sayOut.innerHTML=lastParsed.map((s,i)=>{
+    if(s.bad) return `<span class="syl bad"><span class="spy">${s.raw}</span><span class="sch">?</span><span class="snote">없는 발음</span></span>`;
+    const py=s.tone===5?s.p:mark(s.p+s.tone);
+    const note=s.auto?'성조 자동':s.missing?'이 성조 없음':s.tone===5?'경성':s.tone+'성';
+    return `<button class="syl" data-i="${i}"><span class="spy c${s.tone}">${py}</span><span class="sch">${s.ch}</span><span class="snote">${note}</span></button>`;
+  }).join('');
+}
+function playAll(){
+  renderSay();
+  const txt=lastParsed.filter(s=>!s.bad).map(s=>s.ch).join('');
+  if(txt) say(txt);
+}
+sayIn.addEventListener('input',renderSay);
+sayIn.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); playAll(); } });
+document.getElementById('sayBtn').addEventListener('click',playAll);
+sayOut.addEventListener('click',e=>{ const b=e.target.closest('.syl[data-i]'); if(b){ say(lastParsed[+b.dataset.i].ch,b); } });
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{ sayIn.value=c.dataset.ex; playAll(); }));
+renderSay();
 </script>
 </body>
 </html>
